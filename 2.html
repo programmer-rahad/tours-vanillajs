@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Tours ( Wednesday, 15 September 2021 )</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"
+    />
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      img {
+        max-width: 100%;
+      }
+      a {
+        display: inline-block;
+        text-decoration: none;
+      }
+      body {
+        background-color: #f1f5f8;
+      }
+      .loading {
+        height: 100%;
+        background: #f1f5f8;
+        position: fixed;
+        width: 100%;
+        top: 0;
+        font-size: 45px;
+        text-align: center;
+        padding-top: 50px;
+      }
+      .hide {
+        opacity: 0;
+        visibility: hidden;
+      }
+      .no-tours a {
+        background: #49a6e9;
+        display: inline-block;
+        padding: 0.25rem 0.5rem;
+        padding-bottom: 0.4rem;
+        border-radius: 0.25rem;
+        text-transform: capitalize;
+        color: #fff;
+        letter-spacing: 2px;
+        border-color: transparent;
+        margin-top: 2rem;
+        font-size: 1.2rem;
+      }
+      #tours {
+        margin: 5rem auto;
+        max-width: 650px;
+        padding-left: 15px;
+        padding-right: 15px;
+      }
+      #tours > h2 {
+        font-size: 40px;
+        text-align: center;
+        margin-bottom: 50px;
+      }
+      #tours > h2 span {
+        height: 5px;
+        display: block;
+        width: 96px;
+        background-color: #49a6e9;
+        margin: 10px auto 0 auto;
+      }
+      .tour-item {
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        margin-bottom: 50px;
+      }
+      .tour-item:hover {
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+      }
+      .tour-item > img:first-child {
+        border-top-left-radius: 5px;
+        border-top-right-radius: 5px;
+      }
+      .tour-item .tour-content {
+        padding: 1.5rem 2rem;
+        background: #fff;
+      }
+      .tour-item .tour-content .title-price {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+      }
+      .tour-item .tour-content .title-price h3 {
+        color: #102a42;
+      }
+      .tour-item .tour-content .title-price span {
+        color: #49a6e9;
+        padding: 4px 10px;
+        font-weight: 700;
+        background-color: #ebf7ff;
+        border-radius: 5px;
+      }
+      .tour-content .tour-text {
+        color: #617d98;
+        font-size: 16px;
+        line-height: 24px;
+      }
+      .tour-content .tour-text p {
+        display: inline-block;
+      }
+      .tour-item .tour-content .tour-text button {
+        background-color: transparent;
+        border: none;
+        color: #49a6e9;
+        text-transform: capitalize;
+        font-size: 18px;
+        margin-left: 5px;
+        cursor: pointer;
+      }
+      .tour-content > a:last-child {
+        padding: 3px 25px;
+        border-radius: 5px;
+        border: 1px solid;
+        color: #bb2525;
+        position: relative;
+        left: 50%;
+        transform: translateX(-50%);
+        margin-top: 20px;
+      }
+      .tour-content > a:last-child:hover {
+        background-color: #bb2525;
+        color: #fff;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="loading no-tours hide">
+      <h2>No Tours Left...</h2>
+      <a href="#">Refresh</a>
+    </div>
+    <div class="loading">
+      <h2>Loading...</h2>
+    </div>
+    <section id="tours">
+      <h2>Our Tours <span class="border-bottom"></span></h2>
+      <div class="tour-items"></div>
+      <script>
+        // variables
+        const tourItemsDiv = document.querySelector('.tour-items');
+        const loadingDiv = document.querySelectorAll('.loading');
+        const refreshButton = document.querySelector('.no-tours a');
+        let url = 'https://course-api.com/react-tours-project';
+        let tours = [];
+
+        function showTours(tours) {
+          let html = '';
+          for (let i = 0; i < tours.length; i++) {
+            const { id, name, image, info, price } = tours[i];
+            html += `
+              <div class="tour-item">
+                <img src="${image}" alt=""/>
+                <div class="tour-content">
+                  <div class="title-price">
+                    <h3>${name}</h3>
+                    <span> $${price} </span>
+                  </div>
+                  <p class="tour-text">${info.substr(0, 200)}...
+                    <button data-id="${id}">Show More</button>
+                  </p>
+                  <a data-id="${id}" href="#">Not Interested</a>
+                </div>
+              </div>
+            `;
+          }
+          tourItemsDiv.innerHTML = html;
+          loadingDiv[1].classList.add('hide');
+        }
+
+        // Function: Get Tours
+        function getTours() {
+          const xhr = new XMLHttpRequest();
+          xhr.open('get', url);
+          xhr.onreadystatechange = function () {
+            if (this.readyState === XMLHttpRequest.DONE) {
+              if (this.status === 200) {
+                tours = JSON.parse(this.responseText);
+                showTours(tours);
+              } else {
+                console.log('Erorrr');
+              }
+            }
+          };
+          xhr.send();
+        }
+
+        // Document Load Event
+        document.addEventListener('DOMContentLoaded', function () {
+          // Get Tours
+          getTours();
+
+          // Toggle and Remove Tour
+          tourItemsDiv.addEventListener('click', function (e) {
+            const target = e.target;
+            const id = target.dataset.id;
+            if (!id) return;
+
+            // Toggle Tour Content
+            if (target.nodeName === 'BUTTON') {
+              const fullText = tours.find(tour => tour.id === id).info;
+              const thisText = target.previousSibling.nodeValue.trim();
+              if (thisText.length > 203) {
+                target.previousSibling.nodeValue =
+                  fullText.substring(0, 200) + '...';
+                target.textContent = 'Show More';
+              } else {
+                target.previousSibling.nodeValue = fullText;
+                target.textContent = 'Show Less';
+              }
+            }
+
+            // Delete Tour
+            if (target.nodeName === 'A') {
+              target.parentElement.parentElement.remove();
+              if (!tourItemsDiv.children.length) {
+                loadingDiv[0].classList.remove('hide');
+              }
+            } 
+            e.preventDefault();
+          });
+
+          // Refresh Tours
+          refreshButton.addEventListener('click',e => {
+            loadingDiv[0].classList.add('hide');
+            loadingDiv[1].classList.remove('hide');
+            showTours(tours);
+            e.preventDefault();
+          })
+
+        });
+      </script>
+    </section>
+  </body>
+</html>
